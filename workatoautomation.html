@@ -128,10 +128,10 @@
         <div class="art-deco-corner corner-bl"></div>
         <div class="art-deco-corner corner-br"></div>
         <div id="detailInner" class="detail-enter">
-          <div id="detailRecipe" style="font-family:'Cinzel',serif; font-size:9px; letter-spacing:3px; color:var(--gold); text-transform:uppercase; margin-bottom:2px;"></div>
+          <div id="detailRecipe" style="font-family:'Cinzel',serif; font-size:9px; letter-spacing:3px; color:#6BAED6; text-transform:uppercase; margin-bottom:2px;"></div>
           <div id="detailTitle" style="font-family:'Cinzel',serif; font-size:17px; font-weight:700; color:var(--navy); margin-bottom:6px;"></div>
           <div id="detailBody" style="font-size:13px; line-height:1.55; color:#3a3a3a;"></div>
-          <div id="detailNote" style="font-size:11px; font-style:italic; color:var(--gold); margin-top:6px; padding-left:12px; border-left:2px solid var(--gold);"></div>
+          <div id="detailNote" style="font-size:11px; font-style:italic; color:#6BAED6; margin-top:6px; padding-left:12px; border-left:2px solid #6BAED6;"></div>
         </div>
         <!-- Branch diagram for station 5 -->
         <div id="branchDiagram" class="hidden mt-3"></div>
@@ -170,32 +170,32 @@
   <script>
 const STATIONS = [
   { id:1, label:"Config Table", color:"var(--yellow)", above:true,
-    recipe:"Recipe: LotusOne Integration", title:"1 — Config Table",
+    recipe:"Recipe: Configuration", title:"1 — Config Table",
     body:"One row in the config table drives the entire run. Facility IDs, paths, date window, endpoint, email. Nothing hardcoded in the recipe.",
     note:"Every parameter externalized for zero-code changes." },
   { id:2, label:"API Call", color:"var(--blue)", above:false,
-    recipe:"Recipe: LotusOne Integration", title:"2 — API Call",
+    recipe:"Onboarding_R1_ClientSettings", title:"2 — API Call",
     body:"LotusOne API called with config table parameters. Response decrypted and parsed from Base64 JSON.",
     note:"Credentials entered once at creation, never stored in recipe." },
   { id:3, label:"Filter + Dedup", color:"var(--blue)", above:true,
-    recipe:"Recipe: LotusOne Integration", title:"3 — Filter + Dedup",
+    recipe:"Onboarding_R1_ClientSettings", title:"3 — Filter + Dedup",
     body:"Fields filtered to only what's needed. Contracts checked against historical file. Already-processed contracts skipped. EXT bypasses this check.",
     note:"History CSV prevents duplicate Workday calls." },
   { id:4, label:"Validation Gate", color:"var(--navy)", above:false,
-    recipe:"Recipe: LotusOne Integration", title:"4 — Validation Gate",
+    recipe:"Onboarding_R1_ClientSettings", title:"4 — Validation Gate",
     body:"DOB, SSN, Position ID, date window all checked. Fail any — contract goes to failed list. No Workday call made.",
     note:"Fail-fast: bad data never reaches Workday." },
   { id:5, label:"Routing", color:"var(--yellow)", above:true,
-    recipe:"Recipe: LotusOne Integration", title:"5 — Routing",
+    recipe:"Onboarding Processing Engine R2", title:"5 — Routing",
     body:"Four paths, checked in order. First match executes Workday call.",
     note:"EXT → Rehire Terminated → Rehire Former Worker → New Hire.",
     branches: true },
   { id:6, label:"Workday Call", color:"var(--navy)", above:false,
-    recipe:"Recipe: LotusOne Integration", title:"6 — Workday Call",
+    recipe:"Onboarding Processing Engine R2", title:"6 — Workday Call",
     body:"Correct web service call executes inside a monitor block. One automatic retry on error. Run never stops for one failure.",
     note:"R2 Recipe Engine runs for all clients, utilizing carryover connection from R1." },
   { id:7, label:"Logging + Email", color:"var(--lilac)", above:true,
-    recipe:"Recipe: LotusOne Integration", title:"7 — Logging + Email",
+    recipe:"Onboarding_R3_ClientLogging", title:"7 — Logging + Email",
     body:"Success CSV and failure CSV written to paths set in Config Table. Notification emails triggered from Config Table settings. Run complete.",
     note:"Recipe completes successfully without any data interaction." }
 ];
