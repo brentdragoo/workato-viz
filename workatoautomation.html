@@ -1,0 +1,478 @@
+<!doctype html>
+<html lang="en" class="h-full">
+ <head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <script src="https://cdn.tailwindcss.com/3.4.17"></script>
+  <script src="https://cdn.jsdelivr.net/npm/lucide@0.263.0/dist/umd/lucide.min.js"></script>
+  <script src="/_sdk/element_sdk.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Poiret+One&amp;family=Raleway:wght@300;400;600;700&amp;family=Cinzel:wght@400;700;900&amp;display=swap" rel="stylesheet">
+  <style>
+  html, body { height: 100%; margin: 0; overflow: hidden; }
+  * { box-sizing: border-box; }
+
+  :root {
+    --navy: #1B3A6B;
+    --yellow: #FFD700;
+    --blue: #2E75B6;
+    --red: #C0392B;
+    --cream: #F5F0E1;
+    --gold: #C9A84C;
+    --teal: #1A8A7D;
+    --orange: #D4741A;
+  }
+
+  @keyframes pulse-gold {
+    0%, 100% { box-shadow: 0 0 0 0 rgba(201,168,76,0.7), inset 0 0 12px rgba(255,215,0,0.15); }
+    50% { box-shadow: 0 0 24px 8px rgba(201,168,76,0.4), inset 0 0 20px rgba(255,215,0,0.3); }
+  }
+  .node-active { animation: pulse-gold 1.8s ease-in-out infinite; }
+
+  @keyframes token-bounce {
+    0%, 100% { transform: translate(-50%, -50%) scale(1); }
+    50% { transform: translate(-50%, -50%) scale(1.15); }
+  }
+
+  .token {
+    animation: token-bounce 1.2s ease-in-out infinite;
+    filter: drop-shadow(0 0 8px rgba(201,168,76,0.6));
+  }
+
+  @keyframes fadeSlideUp {
+    from { opacity: 0; transform: translateY(16px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  .detail-enter { animation: fadeSlideUp 0.4s ease-out forwards; }
+
+  @keyframes shimmer {
+    0% { background-position: -200% 0; }
+    100% { background-position: 200% 0; }
+  }
+
+  .gold-shimmer-line {
+    height: 2px;
+    background: linear-gradient(90deg, transparent, var(--gold), transparent);
+    background-size: 200% 100%;
+    animation: shimmer 3s linear infinite;
+  }
+
+  .chevron-pattern {
+    background-image: repeating-linear-gradient(
+      60deg, transparent, transparent 8px,
+      rgba(201,168,76,0.08) 8px, rgba(201,168,76,0.08) 9px
+    ), repeating-linear-gradient(
+      -60deg, transparent, transparent 8px,
+      rgba(201,168,76,0.08) 8px, rgba(201,168,76,0.08) 9px
+    );
+  }
+
+  .hexagon-clip {
+    clip-path: polygon(50% 0%, 93% 25%, 93% 75%, 50% 100%, 7% 75%, 7% 25%);
+  }
+
+  /* Branch paths for station 5 */
+  @keyframes branchReveal {
+    from { stroke-dashoffset: 100; opacity: 0; }
+    to { stroke-dashoffset: 0; opacity: 1; }
+  }
+  .branch-anim { animation: branchReveal 0.6s ease-out forwards; }
+
+  .art-deco-corner {
+    position: absolute; width: 28px; height: 28px;
+    border-color: var(--gold);
+  }
+  .corner-tl { top: 0; left: 0; border-top: 2px solid; border-left: 2px solid; }
+  .corner-tr { top: 0; right: 0; border-top: 2px solid; border-right: 2px solid; }
+  .corner-bl { bottom: 0; left: 0; border-bottom: 2px solid; border-left: 2px solid; }
+  .corner-br { bottom: 0; right: 0; border-bottom: 2px solid; border-right: 2px solid; }
+</style>
+  <style>body { box-sizing: border-box; }</style>
+  <script src="/_sdk/data_sdk.js" type="text/javascript"></script>
+ </head>
+ <body class="h-full" style="background: var(--cream);">
+  <div id="app" class="h-full w-full flex flex-col overflow-auto" style="font-family: 'Raleway', sans-serif;">
+   <!-- HEADER -->
+   <header class="relative px-6 pt-5 pb-3 text-center flex-shrink-0">
+    <div class="gold-shimmer-line w-full mb-3"></div>
+    <div class="flex items-center justify-center gap-4">
+     <svg width="32" height="20" viewbox="0 0 32 20"><polygon points="0,10 8,0 12,0 4,10 12,20 8,20" fill="var(--gold)" /><polygon points="20,10 28,0 32,0 24,10 32,20 28,20" fill="var(--gold)" />
+     </svg>
+     <h1 id="mainTitle" style="font-family: 'Cinzel', serif; color: var(--navy); font-size: 22px; font-weight: 900; letter-spacing: 4px;">WORKATO ONBOARDING AUTOMATED PROCESS</h1>
+     <svg width="32" height="20" viewbox="0 0 32 20"><polygon points="0,10 8,0 12,0 4,10 12,20 8,20" fill="var(--gold)" /><polygon points="20,10 28,0 32,0 24,10 32,20 28,20" fill="var(--gold)" />
+     </svg>
+    </div>
+    <div class="gold-shimmer-line w-full mt-3"></div>
+   </header><!-- TIMELINE AREA -->
+   <div class="flex-1 relative px-4 pb-2" style="min-height: 0;">
+    <svg id="pathSvg" class="absolute inset-0 w-full h-full pointer-events-none" style="z-index: 1;"></svg>
+    <div id="nodesContainer" class="relative w-full h-full" style="z-index: 2;"></div><!-- Token -->
+    <div id="tokenEl" class="token absolute" style="z-index: 10; pointer-events: none;">
+     <svg width="28" height="28" viewbox="0 0 28 28">
+      <polygon points="14,0 26,7 26,21 14,28 2,21 2,7" fill="var(--gold)" stroke="#1B3A6B" stroke-width="2" /> <text x="14" y="16" text-anchor="middle" fill="var(--navy)" font-size="10" font-weight="bold" style="font-family:'Cinzel',serif">
+       ✦
+      </text>
+     </svg>
+    </div>
+   </div><!-- DETAIL CARD -->
+   <div id="detailCard" class="flex-shrink-0 mx-auto w-full" style="max-width: 720px; padding: 0 16px;">
+    <div class="relative p-4" style="background: rgba(27,58,107,0.04); border: 1px solid var(--gold); min-height: 110px;">
+     <div class="art-deco-corner corner-tl"></div>
+     <div class="art-deco-corner corner-tr"></div>
+     <div class="art-deco-corner corner-bl"></div>
+     <div class="art-deco-corner corner-br"></div>
+     <div id="detailInner" class="detail-enter">
+      <div id="detailRecipe" style="font-family:'Cinzel',serif; font-size:9px; letter-spacing:3px; color:var(--gold); text-transform:uppercase; margin-bottom:2px;"></div>
+      <div id="detailTitle" style="font-family:'Cinzel',serif; font-size:17px; font-weight:700; color:var(--navy); margin-bottom:6px;"></div>
+      <div id="detailBody" style="font-size:13px; line-height:1.55; color:#3a3a3a;"></div>
+      <div id="detailNote" style="font-size:11px; font-style:italic; color:var(--gold); margin-top:6px; padding-left:12px; border-left:2px solid var(--gold);"></div>
+     </div><!-- Branch diagram for station 5 -->
+     <div id="branchDiagram" class="hidden mt-3"></div>
+    </div>
+   </div><!-- CONTROLS + STATUS BAR -->
+   <footer class="flex-shrink-0 px-6 pt-3 pb-4">
+    <div class="flex items-center justify-center gap-5 mb-3">
+     <button id="btnPrev" onclick="goStep(-1)" aria-label="Previous step" class="flex items-center justify-center" style="width:36px;height:36px;border:2px solid var(--navy);background:transparent;color:var(--navy);cursor:pointer;transition:all 0.2s;" onmouseenter="this.style.background='var(--navy)';this.style.color='var(--cream)'" onmouseleave="this.style.background='transparent';this.style.color='var(--navy)'"> <i data-lucide="chevron-left" style="width:18px;height:18px;"></i> </button> <button id="btnPlay" onclick="togglePlay()" aria-label="Play or pause" class="flex items-center justify-center" style="width:44px;height:44px;border:2px solid var(--gold);background:var(--gold);color:var(--navy);cursor:pointer;transition:all 0.2s;"> <i data-lucide="play" id="playIcon" style="width:20px;height:20px;"></i> </button> <button id="btnNext" onclick="goStep(1)" aria-label="Next step" class="flex items-center justify-center" style="width:36px;height:36px;border:2px solid var(--navy);background:transparent;color:var(--navy);cursor:pointer;transition:all 0.2s;" onmouseenter="this.style.background='var(--navy)';this.style.color='var(--cream)'" onmouseleave="this.style.background='transparent';this.style.color='var(--navy)'"> <i data-lucide="chevron-right" style="width:18px;height:18px;"></i> </button>
+    </div><!-- Status bar -->
+    <div class="flex items-center justify-between mx-auto" style="max-width:600px;">
+     <span id="statusName" style="font-family:'Cinzel',serif; font-size:10px; letter-spacing:3px; color:var(--navy); text-transform:uppercase;"></span> <span id="statusStep" style="font-size:11px; color:var(--gold); font-weight:600;"></span>
+    </div>
+    <div class="mx-auto mt-2 flex gap-1" id="progressBar" style="max-width:600px; height:6px;"></div>
+   </footer>
+  </div>
+  <script>
+const STATIONS = [
+  { id:1, label:"Config Table", color:"var(--yellow)", above:true,
+    recipe:"Recipe: LotusOne Integration", title:"1 — Config Table",
+    body:"One row in the config table drives the entire run. Facility IDs, paths, date window, endpoint, email. Nothing hardcoded in the recipe.",
+    note:"Every parameter externalized for zero-code changes." },
+  { id:2, label:"API Call", color:"var(--blue)", above:false,
+    recipe:"Recipe: LotusOne Integration", title:"2 — API Call",
+    body:"LotusOne API called with config table parameters. Response decrypted and parsed from Base64 JSON.",
+    note:"Credentials stored in Connection, never in recipe." },
+  { id:3, label:"Filter + Dedup", color:"var(--blue)", above:true,
+    recipe:"Recipe: LotusOne Integration", title:"3 — Filter + Dedup",
+    body:"Fields filtered to only what's needed. Contracts checked against historical file. Already-processed contracts skipped. EXT bypasses this check.",
+    note:"History CSV prevents duplicate Workday calls." },
+  { id:4, label:"Validation Gate", color:"var(--navy)", above:false,
+    recipe:"Recipe: LotusOne Integration", title:"4 — Validation Gate",
+    body:"DOB, SSN, Position ID, date window all checked. Fail any — contract goes to failed list. No Workday call made.",
+    note:"Fail-fast: bad data never reaches Workday." },
+  { id:5, label:"Routing", color:"var(--yellow)", above:true,
+    recipe:"Recipe: LotusOne Integration", title:"5 — Routing",
+    body:"Four paths, checked in order. First match wins.",
+    note:"EXT → Rehire Terminated → Rehire Former Worker → New Hire.",
+    branches: true },
+  { id:6, label:"Workday Call", color:"var(--navy)", above:false,
+    recipe:"Recipe: LotusOne Integration", title:"6 — Workday Call",
+    body:"Correct web service call executes inside a monitor block. One automatic retry on error. Run never stops for one failure.",
+    note:"Monitor + retry = resilience without human intervention." },
+  { id:7, label:"Logging + Email", color:"var(--red)", above:true,
+    recipe:"Recipe: LotusOne Integration", title:"7 — Logging + Email",
+    body:"Success CSV, updated history file, Anthropic plain-English summary, notification emails. Run complete.",
+    note:"AI summary turns raw logs into stakeholder-ready updates." }
+];
+
+const BRANCHES = [
+  { label:"EXT", color:"var(--teal)" },
+  { label:"Rehire Term.", color:"var(--orange)" },
+  { label:"Rehire Fmr.", color:"var(--blue)" },
+  { label:"New Hire", color:"var(--navy)" }
+];
+
+let currentStep = 0;
+let playing = true;
+let timer = null;
+let nodePositions = []; // {cx, cy} for each station
+
+function computeLayout() {
+  const container = document.getElementById('nodesContainer');
+  const W = container.clientWidth;
+  const H = container.clientHeight;
+  const marginX = 60;
+  const usableW = W - marginX * 2;
+  const stepX = usableW / 6; // 7 nodes, 6 gaps
+  const centerY = H * 0.5;
+  const offsetY = H * 0.22;
+
+  nodePositions = STATIONS.map((s, i) => ({
+    cx: marginX + i * stepX,
+    cy: s.above ? centerY - offsetY : centerY + offsetY
+  }));
+}
+
+function renderNodes() {
+  const container = document.getElementById('nodesContainer');
+  container.innerHTML = '';
+  STATIONS.forEach((s, i) => {
+    const pos = nodePositions[i];
+    const isActive = i === currentStep;
+    const size = isActive ? 52 : 44;
+    const el = document.createElement('div');
+    el.className = 'absolute flex flex-col items-center cursor-pointer';
+    el.style.cssText = `left:${pos.cx}px; top:${pos.cy}px; transform:translate(-50%,-50%); z-index:5;`;
+    el.onclick = () => { currentStep = i; renderAll(); resetTimer(); };
+
+    // Hexagon node
+    const hex = document.createElement('div');
+    hex.className = `hexagon-clip flex items-center justify-center ${isActive ? 'node-active' : ''}`;
+    hex.style.cssText = `width:${size}px; height:${size}px; background:${s.color}; border:3px solid ${isActive ? 'var(--gold)' : 'var(--navy)'}; transition: all 0.3s;`;
+
+    // Inner hex (double stroke effect)
+    const inner = document.createElement('div');
+    inner.className = 'hexagon-clip flex items-center justify-center';
+    const innerSize = size - 8;
+    inner.style.cssText = `width:${innerSize}px; height:${innerSize}px; background:${s.color}; border:1.5px solid ${isActive ? 'var(--cream)' : 'rgba(27,58,107,0.3)'};`;
+    inner.innerHTML = `<span style="font-family:'Cinzel',serif; font-size:${isActive?15:13}px; font-weight:900; color:${s.color==='var(--yellow)'?'var(--navy)':'var(--cream)'};">${s.id}</span>`;
+    hex.appendChild(inner);
+    el.appendChild(hex);
+
+    // Label
+    const lbl = document.createElement('div');
+    lbl.style.cssText = `font-family:'Cinzel',serif; font-size:9px; font-weight:700; letter-spacing:1.5px; color:var(--navy); text-align:center; margin-top:5px; white-space:nowrap; text-transform:uppercase;`;
+    lbl.textContent = s.label;
+    el.appendChild(lbl);
+
+    container.appendChild(el);
+  });
+}
+
+function renderPath() {
+  const svg = document.getElementById('pathSvg');
+  svg.innerHTML = '';
+  if (nodePositions.length < 2) return;
+
+  // Build angular stepped path
+  let pathD = `M ${nodePositions[0].cx} ${nodePositions[0].cy}`;
+  for (let i = 1; i < nodePositions.length; i++) {
+    const prev = nodePositions[i-1];
+    const curr = nodePositions[i];
+    const midX = (prev.cx + curr.cx) / 2;
+    // Step: go horizontal to midpoint, then vertical, then horizontal
+    pathD += ` L ${midX} ${prev.cy} L ${midX} ${curr.cy} L ${curr.cx} ${curr.cy}`;
+  }
+
+  // Gold edge highlight (wider, behind)
+  const highlight = document.createElementNS('http://www.w3.org/2000/svg','path');
+  highlight.setAttribute('d', pathD);
+  highlight.setAttribute('fill','none');
+  highlight.setAttribute('stroke','var(--gold)');
+  highlight.setAttribute('stroke-width','6');
+  highlight.setAttribute('stroke-linecap','round');
+  highlight.setAttribute('stroke-linejoin','round');
+  highlight.setAttribute('opacity','0.4');
+  svg.appendChild(highlight);
+
+  // Navy main path
+  const main = document.createElementNS('http://www.w3.org/2000/svg','path');
+  main.setAttribute('d', pathD);
+  main.setAttribute('fill','none');
+  main.setAttribute('stroke','var(--navy)');
+  main.setAttribute('stroke-width','3');
+  main.setAttribute('stroke-linecap','round');
+  main.setAttribute('stroke-linejoin','round');
+  svg.appendChild(main);
+
+  // Render branch fan-out lines for station 5 when active
+  if (currentStep === 4) {
+    const s5 = nodePositions[4];
+    const s6 = nodePositions[5];
+    const midX = (s5.cx + s6.cx) / 2;
+    const spread = 30;
+    BRANCHES.forEach((b, bi) => {
+      const offsetY = (bi - 1.5) * spread;
+      const bPath = `M ${s5.cx} ${s5.cy} L ${s5.cx+20} ${s5.cy} L ${midX} ${(s5.cy+s6.cy)/2 + offsetY} L ${s6.cx-20} ${s6.cy} L ${s6.cx} ${s6.cy}`;
+      const bEl = document.createElementNS('http://www.w3.org/2000/svg','path');
+      bEl.setAttribute('d', bPath);
+      bEl.setAttribute('fill','none');
+      bEl.setAttribute('stroke', b.color);
+      bEl.setAttribute('stroke-width','2');
+      bEl.setAttribute('stroke-dasharray','6 4');
+      bEl.setAttribute('opacity','0.8');
+      bEl.classList.add('branch-anim');
+      svg.appendChild(bEl);
+
+      // Label on branch
+      const txt = document.createElementNS('http://www.w3.org/2000/svg','text');
+      txt.setAttribute('x', midX);
+      txt.setAttribute('y', (s5.cy+s6.cy)/2 + offsetY - 5);
+      txt.setAttribute('text-anchor','middle');
+      txt.setAttribute('fill', b.color);
+      txt.setAttribute('font-size','9');
+      txt.setAttribute('font-weight','700');
+      txt.style.fontFamily = "'Cinzel', serif";
+      txt.textContent = b.label;
+      svg.appendChild(txt);
+    });
+  }
+}
+
+function renderToken() {
+  const token = document.getElementById('tokenEl');
+  const pos = nodePositions[currentStep];
+  if (!pos) return;
+  token.style.left = pos.cx + 'px';
+  token.style.top = pos.cy + 'px';
+  token.style.transition = 'left 0.8s cubic-bezier(0.4,0,0.2,1), top 0.8s cubic-bezier(0.4,0,0.2,1)';
+}
+
+function renderDetail() {
+  const s = STATIONS[currentStep];
+  const inner = document.getElementById('detailInner');
+  inner.classList.remove('detail-enter');
+  void inner.offsetWidth;
+  inner.classList.add('detail-enter');
+
+  document.getElementById('detailRecipe').textContent = s.recipe;
+  document.getElementById('detailTitle').textContent = s.title;
+  document.getElementById('detailBody').textContent = s.body;
+  document.getElementById('detailNote').textContent = s.note;
+
+  // Branch diagram
+  const bd = document.getElementById('branchDiagram');
+  if (s.branches) {
+    bd.classList.remove('hidden');
+    bd.innerHTML = '<div class="flex gap-2 justify-center flex-wrap">' +
+      BRANCHES.map(b => `<span style="display:inline-block;padding:3px 10px;border:2px solid ${b.color};color:${b.color};font-family:'Cinzel',serif;font-size:10px;font-weight:700;letter-spacing:1px;">${b.label}</span>`).join('') +
+      '</div>';
+  } else {
+    bd.classList.add('hidden');
+    bd.innerHTML = '';
+  }
+}
+
+function renderStatus() {
+  const s = STATIONS[currentStep];
+  document.getElementById('statusName').textContent = s.label;
+  document.getElementById('statusStep').textContent = `Step ${currentStep+1} of 7`;
+
+  const bar = document.getElementById('progressBar');
+  bar.innerHTML = '';
+  for (let i = 0; i < 7; i++) {
+    const seg = document.createElement('div');
+    seg.style.cssText = `flex:1; height:100%; border-radius:2px; transition:background 0.3s; background:${i <= currentStep ? 'var(--navy)' : 'rgba(201,168,76,0.25)'}; ${i <= currentStep ? 'box-shadow:inset 0 0 4px rgba(201,168,76,0.4)' : ''}`;
+    bar.appendChild(seg);
+  }
+}
+
+function renderPlayButton() {
+  const icon = document.getElementById('playIcon');
+  icon.setAttribute('data-lucide', playing ? 'pause' : 'play');
+  lucide.createIcons();
+}
+
+function renderAll() {
+  computeLayout();
+  renderPath();
+  renderNodes();
+  renderToken();
+  renderDetail();
+  renderStatus();
+}
+
+function goStep(dir) {
+  currentStep = Math.max(0, Math.min(6, currentStep + dir));
+  renderAll();
+  resetTimer();
+}
+
+function togglePlay() {
+  playing = !playing;
+  renderPlayButton();
+  if (playing) startTimer(); else clearInterval(timer);
+}
+
+function startTimer() {
+  clearInterval(timer);
+  timer = setInterval(() => {
+    currentStep = (currentStep + 1) % 7;
+    renderAll();
+  }, 10000);
+}
+
+function resetTimer() {
+  if (playing) startTimer();
+}
+
+// Init
+const defaultConfig = {
+  main_title: "WORKATO ONBOARDING AUTOMATED PROCESS",
+  background_color: "#F5F0E1",
+  surface_color: "#1B3A6B",
+  text_color: "#3a3a3a",
+  primary_action_color: "#C9A84C",
+  secondary_action_color: "#C0392B",
+  font_family: "Cinzel",
+  font_size: 16
+};
+
+window.elementSdk.init({
+  defaultConfig,
+  onConfigChange: async (config) => {
+    const title = config.main_title || defaultConfig.main_title;
+    const el = document.getElementById('mainTitle');
+    if (el) el.textContent = title;
+
+    const bg = config.background_color || defaultConfig.background_color;
+    document.body.style.background = bg;
+    document.documentElement.style.setProperty('--cream', bg);
+
+    const surface = config.surface_color || defaultConfig.surface_color;
+    document.documentElement.style.setProperty('--navy', surface);
+
+    const txt = config.text_color || defaultConfig.text_color;
+    document.querySelectorAll('#detailBody').forEach(e => e.style.color = txt);
+
+    const primary = config.primary_action_color || defaultConfig.primary_action_color;
+    document.documentElement.style.setProperty('--gold', primary);
+
+    const secondary = config.secondary_action_color || defaultConfig.secondary_action_color;
+    document.documentElement.style.setProperty('--red', secondary);
+
+    const font = config.font_family || defaultConfig.font_family;
+    document.querySelectorAll('[style*="Cinzel"]').forEach(e => {
+      e.style.fontFamily = `${font}, Cinzel, serif`;
+    });
+    if (el) el.style.fontFamily = `${font}, Cinzel, serif`;
+
+    const fs = config.font_size || defaultConfig.font_size;
+    const body = document.getElementById('detailBody');
+    if (body) body.style.fontSize = `${fs * 0.8125}px`;
+    const dtitle = document.getElementById('detailTitle');
+    if (dtitle) dtitle.style.fontSize = `${fs * 1.0625}px`;
+
+    renderAll();
+  },
+  mapToCapabilities: (config) => ({
+    recolorables: [
+      { get: () => config.background_color || defaultConfig.background_color, set: (v) => { config.background_color = v; window.elementSdk.setConfig({ background_color: v }); }},
+      { get: () => config.surface_color || defaultConfig.surface_color, set: (v) => { config.surface_color = v; window.elementSdk.setConfig({ surface_color: v }); }},
+      { get: () => config.text_color || defaultConfig.text_color, set: (v) => { config.text_color = v; window.elementSdk.setConfig({ text_color: v }); }},
+      { get: () => config.primary_action_color || defaultConfig.primary_action_color, set: (v) => { config.primary_action_color = v; window.elementSdk.setConfig({ primary_action_color: v }); }},
+      { get: () => config.secondary_action_color || defaultConfig.secondary_action_color, set: (v) => { config.secondary_action_color = v; window.elementSdk.setConfig({ secondary_action_color: v }); }}
+    ],
+    borderables: [],
+    fontEditable: {
+      get: () => config.font_family || defaultConfig.font_family,
+      set: (v) => { config.font_family = v; window.elementSdk.setConfig({ font_family: v }); }
+    },
+    fontSizeable: {
+      get: () => config.font_size || defaultConfig.font_size,
+      set: (v) => { config.font_size = v; window.elementSdk.setConfig({ font_size: v }); }
+    }
+  }),
+  mapToEditPanelValues: (config) => new Map([
+    ["main_title", config.main_title || defaultConfig.main_title]
+  ])
+});
+
+// Initial render
+renderAll();
+renderPlayButton();
+startTimer();
+lucide.createIcons();
+
+// Resize handler
+window.addEventListener('resize', () => renderAll());
+</script>
+ <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9e9df4fab09a876e',t:'MTc3NTc4NDMxOS4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</html>
