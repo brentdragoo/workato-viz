@@ -1,0 +1,575 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>New Client Setup — Workato</title>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&family=Lato:wght@300;400;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --navy: #1B3A6B;
+    --gold: #FFD700;
+    --gold-dim: #C9A84C;
+    --blue: #2E75B6;
+    --red: #C0392B;
+    --cream: #FAFAF5;
+    --text: #2a2a2a;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: var(--cream);
+    font-family: 'Lato', sans-serif;
+    color: var(--text);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* HEADER */
+  header {
+    background: var(--navy);
+    padding: 18px 32px 14px;
+    text-align: center;
+    border-bottom: 3px solid var(--gold);
+  }
+  header .eyebrow {
+    font-family: 'Cinzel', serif;
+    font-size: 9px;
+    letter-spacing: 4px;
+    color: var(--gold-dim);
+    text-transform: uppercase;
+    margin-bottom: 6px;
+  }
+  header h1 {
+    font-family: 'Cinzel', serif;
+    font-size: 22px;
+    font-weight: 700;
+    color: var(--gold);
+    letter-spacing: 2px;
+  }
+  .gold-rule { height: 1px; background: var(--gold-dim); opacity: 0.4; margin-top: 10px; }
+
+  /* BOARD */
+  .board-wrap {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    padding: 0 20px;
+  }
+  .board-area {
+    position: relative;
+    height: 220px;
+    flex-shrink: 0;
+  }
+  svg#pathSvg {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 1;
+  }
+  .nodes-container {
+    position: absolute;
+    inset: 0;
+    z-index: 2;
+  }
+
+  /* NODE */
+  .node {
+    position: absolute;
+    width: 68px;
+    height: 68px;
+    transform: translate(-50%, -50%);
+    cursor: pointer;
+    transition: transform 0.15s;
+  }
+  .node:hover { transform: translate(-50%, -50%) scale(1.08); }
+  .node svg { width: 100%; height: 100%; }
+
+  .node-label {
+    position: absolute;
+    font-family: 'Cinzel', serif;
+    font-size: 9px;
+    letter-spacing: 1px;
+    text-align: center;
+    width: 90px;
+    left: 50%;
+    transform: translateX(-50%);
+    color: var(--navy);
+    line-height: 1.3;
+    font-weight: 700;
+  }
+  .node-label.above { bottom: calc(100% + 6px); }
+  .node-label.below { top: calc(100% + 6px); }
+
+  .node-num {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-family: 'Cinzel', serif;
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--cream);
+    pointer-events: none;
+    z-index: 3;
+  }
+
+  /* TOKEN */
+  #tokenEl {
+    position: absolute;
+    width: 26px;
+    height: 26px;
+    transform: translate(-50%, -50%);
+    z-index: 10;
+    pointer-events: none;
+    transition: left 0.6s cubic-bezier(.4,0,.2,1), top 0.6s cubic-bezier(.4,0,.2,1);
+  }
+
+  /* DETAIL CARD */
+  .detail-card {
+    margin: 12px auto 0;
+    width: 100%;
+    max-width: 780px;
+    border: 1.5px solid var(--gold-dim);
+    background: rgba(27,58,107,0.03);
+    padding: 18px 24px;
+    position: relative;
+    min-height: 100px;
+  }
+  .corner {
+    position: absolute;
+    width: 14px;
+    height: 14px;
+    border-color: var(--gold-dim);
+    border-style: solid;
+  }
+  .corner.tl { top: 4px; left: 4px; border-width: 2px 0 0 2px; }
+  .corner.tr { top: 4px; right: 4px; border-width: 2px 2px 0 0; }
+  .corner.bl { bottom: 4px; left: 4px; border-width: 0 0 2px 2px; }
+  .corner.br { bottom: 4px; right: 4px; border-width: 0 2px 2px 0; }
+
+  .detail-recipe {
+    font-family: 'Cinzel', serif;
+    font-size: 9px;
+    letter-spacing: 3px;
+    color: var(--gold-dim);
+    text-transform: uppercase;
+    margin-bottom: 4px;
+  }
+  .detail-title {
+    font-family: 'Cinzel', serif;
+    font-size: 17px;
+    font-weight: 700;
+    color: var(--navy);
+    margin-bottom: 8px;
+  }
+  .detail-body {
+    font-size: 13px;
+    line-height: 1.65;
+    color: #3a3a3a;
+  }
+  .detail-body ul { margin: 6px 0 6px 18px; }
+  .detail-body li { margin-bottom: 4px; }
+  .detail-note {
+    font-size: 11px;
+    font-style: italic;
+    color: var(--gold-dim);
+    margin-top: 10px;
+    padding-left: 12px;
+    border-left: 2px solid var(--gold-dim);
+  }
+  .code-pill {
+    font-family: monospace;
+    font-size: 11px;
+    background: rgba(27,58,107,0.08);
+    border: 1px solid rgba(27,58,107,0.15);
+    border-radius: 3px;
+    padding: 1px 5px;
+    color: var(--navy);
+  }
+  .warn-inline {
+    display: inline-block;
+    background: #fff3cd;
+    border: 1px solid #f5c842;
+    border-radius: 3px;
+    padding: 2px 7px;
+    font-size: 11px;
+    color: #7b5800;
+    margin-top: 6px;
+  }
+
+  /* CONTROLS */
+  .controls {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    padding: 14px 0 10px;
+    flex-shrink: 0;
+  }
+  .btn {
+    font-family: 'Cinzel', serif;
+    font-size: 11px;
+    letter-spacing: 1.5px;
+    padding: 7px 18px;
+    border: 1.5px solid var(--navy);
+    background: transparent;
+    color: var(--navy);
+    cursor: pointer;
+    text-transform: uppercase;
+    transition: background 0.15s, color 0.15s;
+  }
+  .btn:hover { background: var(--navy); color: var(--gold); }
+  .btn.play { background: var(--navy); color: var(--gold); border-color: var(--navy); }
+  .btn.play:hover { background: #122a52; }
+
+  .status-bar {
+    text-align: center;
+    padding: 6px 0 16px;
+    flex-shrink: 0;
+  }
+  .status-rule { height: 1px; background: var(--gold-dim); opacity: 0.3; margin-bottom: 8px; }
+  .status-text {
+    font-family: 'Cinzel', serif;
+    font-size: 10px;
+    letter-spacing: 2px;
+    color: var(--navy);
+    text-transform: uppercase;
+  }
+  .progress-bar {
+    display: flex;
+    gap: 4px;
+    justify-content: center;
+    margin-top: 6px;
+  }
+  .prog-seg {
+    width: 36px;
+    height: 4px;
+    background: #ccc;
+    border-radius: 2px;
+    transition: background 0.3s;
+  }
+  .prog-seg.done { background: var(--navy); }
+  .prog-seg.active { background: var(--gold); }
+
+  @keyframes pulse-gold {
+    0%, 100% { filter: drop-shadow(0 0 4px rgba(255,215,0,0.6)); }
+    50% { filter: drop-shadow(0 0 10px rgba(255,215,0,1)); }
+  }
+  .node.active svg { animation: pulse-gold 1.5s infinite; }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="eyebrow">Client Integration Team &nbsp;✦&nbsp; Reference Guide</div>
+  <h1>New Client Setup</h1>
+  <div class="gold-rule"></div>
+</header>
+
+<div class="board-wrap">
+  <div class="board-area">
+    <svg id="pathSvg"></svg>
+    <div class="nodes-container" id="nodesContainer"></div>
+    <div id="tokenEl">
+      <svg viewBox="0 0 26 26">
+        <polygon points="13,0 24,6.5 24,19.5 13,26 2,19.5 2,6.5" fill="#FFD700" stroke="#1B3A6B" stroke-width="2"/>
+        <text x="13" y="16" text-anchor="middle" fill="#1B3A6B" font-size="9" font-weight="bold" font-family="Cinzel,serif">✦</text>
+      </svg>
+    </div>
+  </div>
+
+  <div class="detail-card" id="detailCard">
+    <div class="corner tl"></div><div class="corner tr"></div>
+    <div class="corner bl"></div><div class="corner br"></div>
+    <div id="detailRecipe" class="detail-recipe"></div>
+    <div id="detailTitle" class="detail-title"></div>
+    <div id="detailBody" class="detail-body"></div>
+    <div id="detailNote" class="detail-note" style="display:none"></div>
+  </div>
+
+  <div class="controls">
+    <button class="btn" id="btnPrev">◀ Back</button>
+    <button class="btn play" id="btnPlay">▶ Play</button>
+    <button class="btn" id="btnNext">Next ▶</button>
+  </div>
+
+  <div class="status-bar">
+    <div class="status-rule"></div>
+    <div class="status-text" id="statusText">Step 1 of 6</div>
+    <div class="progress-bar" id="progressBar"></div>
+  </div>
+</div>
+
+<script>
+const STEPS = [
+  {
+    label: "Workato\nFolder",
+    tag: "Setup",
+    color: "#1B3A6B",
+    title: "Create a client folder in Workato",
+    body: `Name the folder exactly as the client will appear in the config table. Casing matters — this name is used as a lookup key at runtime.`,
+    note: null
+  },
+  {
+    label: "SFTP\nStructure",
+    tag: "Setup",
+    color: "#2E75B6",
+    title: "Create the SFTP directory structure",
+    body: `<ul>
+      <li><span class="code-pill">[Client Name]/WorkatoProcessFiles/</span></li>
+      <li style="margin-left:12px"><span class="code-pill">HistoricalFile.csv</span> — initialize with header row only:<br>
+        <span class="code-pill" style="font-size:10px">ContractId,LegalFirstName,LegalLastName,ContractStartDate,ContractEndDate</span></li>
+      <li><span class="code-pill">[Client Name]/Logs/Success/</span></li>
+      <li><span class="code-pill">[Client Name]/Logs/Fail/</span></li>
+    </ul>`,
+    note: "The HistoricalFile.csv must exist before the first run — an empty file with only the header row is fine."
+  },
+  {
+    label: "Config\nTable",
+    tag: "Configuration",
+    color: "#C9A84C",
+    title: "Add a row to the Workday Client Config lookup table",
+    body: `Populate all 10 columns with the correct client values. The <span class="code-pill">Client Name</span> value must exactly match the folder name from step 1. This is how R1 looks up its configuration at runtime.`,
+    note: null
+  },
+  {
+    label: "Copy\nRecipes",
+    tag: "Workato",
+    color: "#1B3A6B",
+    title: "Copy recipes into the new client folder",
+    body: `Copy the following two recipes into the client folder:
+    <ul>
+      <li><span class="code-pill">Onboarding_R1_ClientSettings</span></li>
+      <li><span class="code-pill">Onboarding_R3_ClientLogging</span></li>
+    </ul>`,
+    note: "R2 is shared across all clients and must never be copied."
+  },
+  {
+    label: "Configure\nR1",
+    tag: "Workato",
+    color: "#2E75B6",
+    title: "Configure R1 — verify three things",
+    body: `<ul>
+      <li>Client name in <span class="code-pill">R1 Step 2</span> matches the <span class="code-pill">Client Name</span> in the config table row</li>
+      <li>R3 callable step points to <span class="code-pill">[Client Name]/Onboarding_R3_ClientLogging</span>, not the generic folder</li>
+      <li>R2 callable step still points to <span class="code-pill">[Generic Recipes]/Onboarding_R2_HireProcessingEngine</span></li>
+    </ul>
+    <div class="warn-inline">R2 is shared — never redirect it to a per-client copy.</div>`,
+    note: null
+  },
+  {
+    label: "Schedule\n& Start",
+    tag: "Go Live",
+    color: "#C0392B",
+    title: "Set the schedule and start the recipe",
+    body: `Set the R1 trigger to the client's requested run time and start the recipe. Confirm the first job completes successfully in Workato job history.`,
+    note: "Monitor the first two runs manually before handing off."
+  }
+];
+
+const NODE_COLORS = STEPS.map(s => s.color);
+const ABOVE = [true, false, true, false, true, false];
+
+let current = 0;
+let playing = false;
+let playTimer = null;
+
+function hexPoints(cx, cy, r) {
+  let pts = [];
+  for (let i = 0; i < 6; i++) {
+    let a = Math.PI / 180 * (60 * i - 30);
+    pts.push(`${cx + r * Math.cos(a)},${cy + r * Math.sin(a)}`);
+  }
+  return pts.join(' ');
+}
+
+function getNodePositions() {
+  const wrap = document.querySelector('.board-area');
+  const W = wrap.clientWidth;
+  const H = wrap.clientHeight;
+  const n = STEPS.length;
+  const marginX = 60;
+  const step = (W - marginX * 2) / (n - 1);
+  const midY = H / 2;
+  const offset = 62;
+  return STEPS.map((s, i) => ({
+    x: marginX + i * step,
+    y: ABOVE[i] ? midY - offset : midY + offset
+  }));
+}
+
+function buildBoard() {
+  const svg = document.getElementById('pathSvg');
+  const container = document.getElementById('nodesContainer');
+  svg.innerHTML = '';
+  container.innerHTML = '';
+
+  const positions = getNodePositions();
+  const H = document.querySelector('.board-area').clientHeight;
+  const midY = H / 2;
+
+  // Path
+  let d = `M ${positions[0].x} ${positions[0].y}`;
+  for (let i = 1; i < positions.length; i++) {
+    const mx = (positions[i-1].x + positions[i].x) / 2;
+    d += ` C ${mx} ${positions[i-1].y}, ${mx} ${positions[i].y}, ${positions[i].x} ${positions[i].y}`;
+  }
+
+  // Shadow path
+  const pathShadow = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+  pathShadow.setAttribute('d', d);
+  pathShadow.setAttribute('fill', 'none');
+  pathShadow.setAttribute('stroke', 'rgba(0,0,0,0.08)');
+  pathShadow.setAttribute('stroke-width', '10');
+  pathShadow.setAttribute('stroke-linecap', 'round');
+  svg.appendChild(pathShadow);
+
+  // Main path
+  const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+  path.setAttribute('d', d);
+  path.setAttribute('fill', 'none');
+  path.setAttribute('stroke', '#1B3A6B');
+  path.setAttribute('stroke-width', '5');
+  path.setAttribute('stroke-linecap', 'round');
+  svg.appendChild(path);
+
+  // Gold edge
+  const pathGold = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+  pathGold.setAttribute('d', d);
+  pathGold.setAttribute('fill', 'none');
+  pathGold.setAttribute('stroke', '#C9A84C');
+  pathGold.setAttribute('stroke-width', '1.5');
+  pathGold.setAttribute('stroke-linecap', 'round');
+  pathGold.setAttribute('stroke-dasharray', '6 10');
+  svg.appendChild(pathGold);
+
+  // Vertical connector lines
+  positions.forEach((pos, i) => {
+    const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+    line.setAttribute('x1', pos.x);
+    line.setAttribute('y1', midY);
+    line.setAttribute('x2', pos.x);
+    line.setAttribute('y2', pos.y);
+    line.setAttribute('stroke', '#C9A84C');
+    line.setAttribute('stroke-width', '1');
+    line.setAttribute('stroke-dasharray', '3 4');
+    line.setAttribute('opacity', '0.5');
+    svg.appendChild(line);
+  });
+
+  // Nodes
+  positions.forEach((pos, i) => {
+    const nodeEl = document.createElement('div');
+    nodeEl.className = 'node' + (i === current ? ' active' : '');
+    nodeEl.style.left = pos.x + 'px';
+    nodeEl.style.top = pos.y + 'px';
+    nodeEl.dataset.index = i;
+
+    const col = i <= current ? STEPS[i].color : '#aaa';
+    const r = 28;
+    const pts = hexPoints(34, 34, r);
+    nodeEl.innerHTML = `<svg viewBox="0 0 68 68">
+      <polygon points="${hexPoints(34,34,r+4)}" fill="rgba(201,168,76,0.3)" stroke="#C9A84C" stroke-width="1"/>
+      <polygon points="${pts}" fill="${col}" stroke="${i <= current ? '#C9A84C' : '#ccc'}" stroke-width="2"/>
+      <text x="34" y="40" text-anchor="middle" fill="${i <= current ? '#FFD700' : '#eee'}" font-size="18" font-weight="700" font-family="Cinzel,serif">${i+1}</text>
+    </svg>`;
+
+    // Label
+    const labelEl = document.createElement('div');
+    labelEl.className = 'node-label ' + (ABOVE[i] ? 'below' : 'above');
+    labelEl.textContent = STEPS[i].label.replace('\\n', '\n');
+    labelEl.style.whiteSpace = 'pre';
+    labelEl.style.color = i <= current ? STEPS[i].color : '#aaa';
+    nodeEl.appendChild(labelEl);
+
+    nodeEl.addEventListener('click', () => { setStep(i); });
+    container.appendChild(nodeEl);
+  });
+
+  // Token
+  const tokenEl = document.getElementById('tokenEl');
+  const pos = positions[current];
+  tokenEl.style.left = pos.x + 'px';
+  tokenEl.style.top = pos.y + 'px';
+}
+
+function setStep(i) {
+  current = i;
+  buildBoard();
+  updateDetail();
+  updateStatus();
+}
+
+function updateDetail() {
+  const s = STEPS[current];
+  document.getElementById('detailRecipe').textContent = s.tag;
+  document.getElementById('detailTitle').textContent = s.title;
+  document.getElementById('detailBody').innerHTML = s.body;
+  const noteEl = document.getElementById('detailNote');
+  if (s.note) {
+    noteEl.textContent = s.note;
+    noteEl.style.display = 'block';
+  } else {
+    noteEl.style.display = 'none';
+  }
+}
+
+function updateStatus() {
+  document.getElementById('statusText').textContent = `Step ${current + 1} of ${STEPS.length}  ✦  ${STEPS[current].title}`;
+  const bar = document.getElementById('progressBar');
+  bar.innerHTML = '';
+  STEPS.forEach((_, i) => {
+    const seg = document.createElement('div');
+    seg.className = 'prog-seg' + (i < current ? ' done' : i === current ? ' active' : '');
+    bar.appendChild(seg);
+  });
+}
+
+function buildProgress() {
+  const bar = document.getElementById('progressBar');
+  bar.innerHTML = '';
+  STEPS.forEach((_, i) => {
+    const seg = document.createElement('div');
+    seg.className = 'prog-seg';
+    bar.appendChild(seg);
+  });
+}
+
+document.getElementById('btnNext').addEventListener('click', () => {
+  if (current < STEPS.length - 1) setStep(current + 1);
+});
+document.getElementById('btnPrev').addEventListener('click', () => {
+  if (current > 0) setStep(current - 1);
+});
+document.getElementById('btnPlay').addEventListener('click', () => {
+  if (playing) {
+    clearInterval(playTimer);
+    playing = false;
+    document.getElementById('btnPlay').textContent = '▶ Play';
+    return;
+  }
+  if (current === STEPS.length - 1) setStep(0);
+  playing = true;
+  document.getElementById('btnPlay').textContent = '⏸ Pause';
+  playTimer = setInterval(() => {
+    if (current < STEPS.length - 1) {
+      setStep(current + 1);
+    } else {
+      clearInterval(playTimer);
+      playing = false;
+      document.getElementById('btnPlay').textContent = '▶ Play';
+    }
+  }, 2200);
+});
+
+window.addEventListener('resize', () => buildBoard());
+buildBoard();
+updateDetail();
+buildProgress();
+updateStatus();
+</script>
+</body>
+</html>
